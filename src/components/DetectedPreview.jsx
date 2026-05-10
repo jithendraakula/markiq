@@ -10,7 +10,7 @@ export default function DetectedPreview({ subjects, onConfirm, onDiscard, dark, 
 
   useEffect(() => {
     setTimeout(() => applyRef?.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 120);
-  }, []);
+  }, [applyRef]); // eslint-disable-line
 
   function removeSubject(si) {
     setEdited(prev => prev.filter((_, i) => i !== si));

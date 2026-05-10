@@ -6,6 +6,7 @@ import Navbar            from "./components/Navbar";
 import Hero              from "./components/Hero";
 import MethodBar         from "./components/MethodBar";
 import PastePanel        from "./components/PastePanel";
+import UploadPanel       from "./components/UploadPanel";
 import DetectedPreview   from "./components/DetectedPreview";
 import SubjectCountModal from "./components/SubjectCountModal";
 import SubjectRow, { SubjectHintBanner } from "./components/SubjectRow";
@@ -135,6 +136,7 @@ export default function App() {
           <>
             <MethodBar method={method} setMethod={setMethod} dark={dark} />
             {method === "paste" && <PastePanel dark={dark} onDetected={onDetected} />}
+            {method === "upload" && <UploadPanel dark={dark} onDetected={onDetected} />}
             {method === "manual" && subjects.length === 0 && (
               <div style={{ marginBottom: 16 }}>
                 <button
@@ -152,7 +154,7 @@ export default function App() {
               onClick={() => { setSubjects([]); setPreview(null); setMethod("paste"); }}
               style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid rgba(99,102,241,0.25)", background: "rgba(99,102,241,0.07)", color: "#6366f1", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", display: "inline-flex", alignItems: "center", gap: 6 }}
             >
-              ← Paste new marks
+              ← Enter new marks
             </button>
           </div>
         )}

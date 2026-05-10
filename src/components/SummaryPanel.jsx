@@ -8,6 +8,9 @@ function SubjectRing({ subject, dark, index, onClick }) {
   const g = final !== null ? getGrade(final) : null;
   if (final === null) return null;
 
+  // Use subject.id for stable unique gradient IDs (avoids SVG defs collision)
+  const gradId = `grad-${subject.id}`;
+
   const size = 130, stroke = 9;
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
@@ -29,7 +32,7 @@ function SubjectRing({ subject, dark, index, onClick }) {
           <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)"} strokeWidth={stroke - 3} />
           <motion.circle
             cx={size/2} cy={size/2} r={r} fill="none"
-            stroke={`url(#grad-${index})`} strokeWidth={stroke} strokeLinecap="round"
+            stroke={`url(#${gradId})`} strokeWidth={stroke} strokeLinecap="round"
             strokeDasharray={circ}
             initial={{ strokeDashoffset: circ }}
             animate={{ strokeDashoffset: circ - dash }}
@@ -37,7 +40,7 @@ function SubjectRing({ subject, dark, index, onClick }) {
             style={{ filter: `drop-shadow(0 0 6px ${g.color}99)` }}
           />
           <defs>
-            <linearGradient id={`grad-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor={g.color} stopOpacity="0.7" />
               <stop offset="100%" stopColor={g.color} stopOpacity="1" />
             </linearGradient>
@@ -68,8 +71,10 @@ export default function SummaryPanel({ subjects, dark, onSubjectClick }) {
   if (!scored.length) return null;
 
   const finals = scored.map(s => calcFinal(calcModule(s.m1), calcModule(s.m2)));
-  const best  = scored[finals.indexOf(Math.max(...finals))];
-  const worst = scored[finals.indexOf(Math.min(...finals))];
+  const maxVal = finals.reduce((a, v) => Math.max(a, v), -Infinity);
+  const minVal = finals.reduce((a, v) => Math.min(a, v), Infinity);
+  const best  = scored[finals.indexOf(maxVal)];
+  const worst = scored[finals.indexOf(minVal)];
   const avg   = finals.reduce((a, v) => a + v, 0) / finals.length;
   const g     = getGrade(avg);
 

@@ -87,9 +87,8 @@ export default function Navbar({ dark, setDark, onCalc }) {
           {/* Theme toggle — pill with smooth animation */}
           <motion.button
             onClick={() => setDark(d => !d)}
-
-
-            style={{
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.93 }}            style={{
               width: 60, height: 32, borderRadius: 100, border: "none",
               background: dark
                 ? "linear-gradient(135deg, #1a1a3e, #2a2a5e)"

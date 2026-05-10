@@ -1,9 +1,10 @@
-import { PenLine, Type } from "lucide-react";
+import { PenLine, Type, Upload } from "lucide-react";
 
 export default function MethodBar({ method, setMethod, dark }) {
   const methods = [
     { id: "manual", icon: <PenLine size={14} />, label: "Manual" },
     { id: "paste",  icon: <Type size={14} />,    label: "Paste Text" },
+    { id: "upload", icon: <Upload size={14} />,  label: "Upload" },
   ];
 
   return (

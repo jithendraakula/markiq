@@ -21,7 +21,10 @@ export function calcModule(mod) {
     return Math.round(Math.min(v, 60) * 100) / 100;
   }
   let total = 0;
-  filled.forEach(t => { total += scaleTarget(t.key, mod[t.key]); });
+  filled.forEach(t => {
+    const scaled = scaleTarget(t.key, mod[t.key]);
+    if (scaled !== null) total += scaled;
+  });
   return Math.round(total * 100) / 100;
 }
 

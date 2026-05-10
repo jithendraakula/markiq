@@ -110,7 +110,7 @@ export default function SubjectCountModal({ dark, onConfirm }) {
             cursor: valid ? "pointer" : "not-allowed",
           }}
         >
-          Set up {valid ? parsed : "?"} Subject{parsed !== 1 ? "s" : ""} →
+          Set up {valid ? parsed : "?"} Subject{!valid || parsed !== 1 ? "s" : ""} →
         </motion.button>
         <p style={{ margin: "10px 0 0", fontSize: 11, color: dark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.3)" }}>
           Press Enter to confirm

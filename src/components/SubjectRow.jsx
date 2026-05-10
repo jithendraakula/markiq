@@ -210,7 +210,7 @@ export default function SubjectRow({ subj, idx, onChange, onRemove, dark, openBr
       setTimeout(() => onBreakdownOpened?.(), 600);
     }, 60);
     return () => clearTimeout(t);
-  }, [openBreakdown]); // eslint-disable-line
+  }, [openBreakdown, final, onBreakdownOpened]); // eslint-disable-line
 
   const cardBg = dark
     ? showBreakdown ? "rgba(99,102,241,0.07)" : "rgba(255,255,255,0.022)"
