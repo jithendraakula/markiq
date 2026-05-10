@@ -1,0 +1,138 @@
+import { motion } from "framer-motion";
+import { FileText, Printer } from "lucide-react";
+import { calcModule, calcFinal, getGrade } from "../utils/marks";
+
+function buildReportHTML(scored, studentName, regNo) {
+  const finals  = scored.map(s => calcFinal(calcModule(s.m1), calcModule(s.m2)));
+  const avg     = finals.reduce((a, v) => a + v, 0) / finals.length;
+  const og      = getGrade(avg);
+  const dateStr = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+
+  const rows = scored.map((s, i) => {
+    const f  = finals[i];
+    const g  = getGrade(f);
+    const m1 = calcModule(s.m1);
+    const m2 = calcModule(s.m2);
+    return `
+      <tr>
+        <td>${s.name || `Subject ${i + 1}`}</td>
+        <td>${m1 !== null ? m1.toFixed(1) + "/60" : "—"}</td>
+        <td>${m2 !== null ? m2.toFixed(1) + "/60" : "—"}</td>
+        <td><b style="color:${g.color}">${f.toFixed(1)}/60</b></td>
+        <td style="color:${g.color};font-weight:800">${g.grade}</td>
+        <td>${g.label}</td>
+      </tr>`;
+  }).join("");
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>VFSTR Internal Marks — ${studentName || "Student"}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #f6f6fb; color: #111; padding: 48px 40px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .logo-badge { width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg,#6366f1,#4f46e5); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 15px; }
+    .logo-text { font-size: 18px; font-weight: 800; color: #0d0d1a; }
+    .logo-text span { color: #6366f1; }
+    h1 { font-size: 26px; font-weight: 800; color: #0d0d1a; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .meta { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 4px; }
+    .meta-item { font-size: 13px; color: #555; }
+    .meta-item b { color: #0d0d1a; font-weight: 700; }
+    .divider { height: 2px; background: linear-gradient(90deg,#6366f1,#818cf8,transparent); margin: 24px 0; border-radius: 2px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 28px; }
+    thead th { background: linear-gradient(135deg,#6366f1,#4f46e5); color: #fff; padding: 11px 14px; text-align: left; font-size: 12px; font-weight: 700; }
+    thead th:first-child { border-radius: 8px 0 0 0; }
+    thead th:last-child { border-radius: 0 8px 0 0; }
+    tbody tr:nth-child(even) { background: rgba(99,102,241,0.04); }
+    td { border-bottom: 1px solid #eaebf0; padding: 11px 14px; font-size: 13px; vertical-align: middle; }
+    .summary-card { display: inline-block; background: #fff; border: 1px solid #e0e3f0; border-radius: 14px; padding: 20px 28px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(99,102,241,0.08); }
+    .summary-avg { font-size: 36px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+    .formula-note { font-size: 11px; color: #888; margin-top: 14px; line-height: 1.7; padding: 12px 16px; background: #f0f0f8; border-radius: 8px; }
+    .footer { margin-top: 36px; font-size: 11px; color: #aaa; text-align: center; }
+    @media print { body { padding: 24px 28px; background: #fff; } @page { margin: 18mm 14mm; } }
+  </style>
+</head>
+<body>
+  <div class="logo">
+    <div class="logo-badge">VF</div>
+    <div class="logo-text">VFSTR <span>MarkIQ</span></div>
+  </div>
+  <h1>Internal Marks Report</h1>
+  <div class="meta">
+    <div class="meta-item">Student: <b>${studentName || "—"}</b></div>
+    ${regNo ? `<div class="meta-item">Reg No: <b>${regNo}</b></div>` : ""}
+    <div class="meta-item">Pattern: <b>R22 Revised</b></div>
+    <div class="meta-item">Generated: <b>${dateStr}</b></div>
+  </div>
+  <div class="divider"></div>
+  <table>
+    <thead><tr><th>Subject</th><th>Module 1</th><th>Module 2</th><th>Final</th><th>Grade</th><th>Remark</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="summary-card">
+    <div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Overall Average</div>
+    <div class="summary-avg" style="color:${og.color}">${avg.toFixed(1)}<span style="font-size:18px;font-weight:600;opacity:0.6">/60</span></div>
+    <div style="font-size:15px;font-weight:700;color:${og.color}">${og.grade} · ${og.label}</div>
+  </div>
+  <div class="formula-note">
+    <b>Formula:</b> PRET(÷10→6) + T1(÷20→8) + T2(÷5→3) + T3(÷5→3) + T4(÷20→20) + T5(÷20→20) = 60/module | Final = (M1+M2)÷2 | R22 Revised
+  </div>
+  <div class="footer">Generated by VFSTR MarkIQ · Built by Jithendra Akula · Runs entirely in your browser</div>
+</body>
+</html>`;
+}
+
+export default function ExportBar({ subjects, studentName, regNo = "", dark }) {
+  const scored = subjects.filter(s => calcFinal(calcModule(s.m1), calcModule(s.m2)) !== null);
+  if (!scored.length) return null;
+
+  function exportHTML() {
+    const html = buildReportHTML(scored, studentName, regNo);
+    const blob = new Blob([html], { type: "text/html" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${(studentName || "marks").replace(/\s+/g, "_")}_vfstr_report.html`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function exportPDF() {
+    const html = buildReportHTML(scored, studentName, regNo);
+    const printable = html.replace(
+      "</body>",
+      `<script>window.onload = function() { window.focus(); window.print(); }<\/script></body>`
+    );
+    const win = window.open("", "_blank");
+    if (!win) { alert("Please allow pop-ups to generate the PDF report."); return; }
+    win.document.write(printable);
+    win.document.close();
+  }
+
+  const btn = (onClick, bg, border, color, icon, label) => (
+    <motion.button
+      whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+      onClick={onClick}
+      style={{
+        padding: "9px 18px", borderRadius: 9,
+        background: bg, border: `1px solid ${border}`,
+        color, fontWeight: 600, fontSize: 13,
+        cursor: "pointer", display: "flex", alignItems: "center", gap: 7,
+        fontFamily: "inherit", transition: "all 0.2s",
+      }}
+    >
+      {icon} {label}
+    </motion.button>
+  );
+
+  return (
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 20 }}>
+      {btn(exportHTML, "rgba(99,102,241,0.10)", "rgba(99,102,241,0.28)", "#6366f1", <FileText size={14} />, "Export HTML Report")}
+      {btn(exportPDF, "rgba(16,185,129,0.10)", "rgba(16,185,129,0.28)", "#10b981", <Printer size={14} />, "Download as PDF")}
+    </div>
+  );
+
+}
